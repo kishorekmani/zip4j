@@ -29,35 +29,23 @@ import net.lingala.zip4j.model.ZipModel;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.model.enums.RandomAccessFileMode;
 import net.lingala.zip4j.progress.ProgressMonitor;
-import net.lingala.zip4j.tasks.AddFilesToZipTask;
+import net.lingala.zip4j.tasks.*;
+import net.lingala.zip4j.tasks.AddDataInputStreamToZipTask.AddDataInputStreamToZipTaskParameters;
 import net.lingala.zip4j.tasks.AddFilesToZipTask.AddFilesToZipTaskParameters;
-import net.lingala.zip4j.tasks.AddFolderToZipTask;
 import net.lingala.zip4j.tasks.AddFolderToZipTask.AddFolderToZipTaskParameters;
-import net.lingala.zip4j.tasks.AddStreamToZipTask;
 import net.lingala.zip4j.tasks.AddStreamToZipTask.AddStreamToZipTaskParameters;
-import net.lingala.zip4j.tasks.AsyncZipTask;
-import net.lingala.zip4j.tasks.ExtractAllFilesTask;
 import net.lingala.zip4j.tasks.ExtractAllFilesTask.ExtractAllFilesTaskParameters;
-import net.lingala.zip4j.tasks.ExtractFileTask;
 import net.lingala.zip4j.tasks.ExtractFileTask.ExtractFileTaskParameters;
-import net.lingala.zip4j.tasks.MergeSplitZipFileTask;
 import net.lingala.zip4j.tasks.MergeSplitZipFileTask.MergeSplitZipFileTaskParameters;
-import net.lingala.zip4j.tasks.RemoveFilesFromZipTask;
 import net.lingala.zip4j.tasks.RemoveFilesFromZipTask.RemoveFilesFromZipTaskParameters;
-import net.lingala.zip4j.tasks.RenameFilesTask;
 import net.lingala.zip4j.tasks.RenameFilesTask.RenameFilesTaskParameters;
-import net.lingala.zip4j.tasks.SetCommentTask;
 import net.lingala.zip4j.tasks.SetCommentTask.SetCommentTaskTaskParameters;
 import net.lingala.zip4j.util.FileUtils;
 import net.lingala.zip4j.util.InternalZipConstants;
 import net.lingala.zip4j.util.RawIO;
 import net.lingala.zip4j.util.Zip4jUtil;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -253,6 +241,54 @@ public class ZipFile implements Closeable {
     }
 
     addFolder(folderToAdd, parameters, false);
+  }
+
+
+  /**
+   * Creates a zip file and adds files from the input stream.
+   * This method does the same functionality as in addStream method except that this method can create zip file from stream
+   * content. This method can also create split zip files when adding files from stream. To create a split zip file, set the
+   * splitArchive parameter to true and specify the splitLength. Split length has to be more than or equal to 65536 bytes.
+   * @param dataInputStream
+   * @param zipParameters
+   * @param splitArchive
+   * @param splitLength
+   * @throws ZipException
+   */
+  public void createSplitZipFileFromDataInputStream(DataInputStream dataInputStream, ZipParameters zipParameters, boolean splitArchive,
+                                                    long splitLength) throws ZipException {
+    if (dataInputStream == null) {
+      throw new ZipException("DataInputStream is null, cannot create zip file from data input stream");
+    }
+
+    if (zipParameters == null) {
+      throw new ZipException("input parameters are null, cannot create zip file from Stream");
+    }
+
+    if (zipFile.exists()) {
+      throw new ZipException("zip file: " + zipFile
+              + " already exists");
+    }
+
+    if(zipParameters.getRootFolderNameInZip() != null) {
+        throw new ZipException("Root folder name is null, cannot create zip file from data input stream");
+    }
+
+    createNewZipModel();
+    zipModel.setSplitArchive(splitArchive);
+
+    if (splitArchive) {
+      zipModel.setSplitLength(splitLength);
+    }
+
+    readZipInfo();
+
+    if(zipModel == null) {
+      throw new ZipException("internal error: zip model is null");
+    }
+
+    new AddDataInputStreamToZipTask(zipModel, password, headerWriter, buildAsyncParameters()).execute(
+        new AddDataInputStreamToZipTaskParameters(dataInputStream, zipParameters, buildConfig()));
   }
 
   /**
