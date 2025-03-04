@@ -106,7 +106,6 @@ public class AddDataInputStreamToZipTask extends AbstractAddFileToZipTask<AddDat
             try {
                 this.rootFolderName = dataInputStream.readUTF();
                 zipParameters.setRootFolderNameInZip(rootFolderName);
-                System.out.println("Read root folder name from stream: " + rootFolderName);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
