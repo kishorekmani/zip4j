@@ -270,9 +270,9 @@ public class ZipFile implements Closeable {
               + " already exists");
     }
 
-    if(zipParameters.getRootFolderNameInZip() != null) {
-        throw new ZipException("Root folder name is null, cannot create zip file from data input stream");
-    }
+//    if(zipParameters.getRootFolderNameInZip() == null) {
+//        throw new ZipException("Root folder name is null, cannot create zip file from data input stream");
+//    }
 
     createNewZipModel();
     zipModel.setSplitArchive(splitArchive);

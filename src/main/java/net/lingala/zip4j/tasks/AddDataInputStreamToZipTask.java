@@ -70,6 +70,7 @@ public class AddDataInputStreamToZipTask extends AbstractAddFileToZipTask<AddDat
                 }
                 progressMonitor.setFileName(fileName);
                 ZipParameters zipParameters = new ZipParameters();
+                zipParameters.setRootFolderNameInZip(taskParameters.zipParameters.getRootFolderNameInZip());
                 zipParameters.setFileNameInZip(fileName);
                 addFileFromStreamToZip(taskParameters.dataInputStream, zipOutputStream, zipParameters, splitOutputStream, progressMonitor, readBuff);
             }
@@ -101,6 +102,7 @@ public class AddDataInputStreamToZipTask extends AbstractAddFileToZipTask<AddDat
             this.zipParameters = zipParameters;
             try {
                 this.rootFolderName = dataInputStream.readUTF();
+                zipParameters.setRootFolderNameInZip(rootFolderName);
                 System.out.println("Read root folder name from stream: " + rootFolderName);
             } catch (IOException e) {
                 throw new RuntimeException(e);
