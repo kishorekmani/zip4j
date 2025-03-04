@@ -14,6 +14,7 @@ import net.lingala.zip4j.tasks.AddDataInputStreamToZipTask.AddDataInputStreamToZ
 
 import java.io.*;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static net.lingala.zip4j.util.FileUtils.getFilesInDirectoryRecursive;
 import static net.lingala.zip4j.util.Zip4jUtil.getCompressionMethod;
@@ -59,10 +60,14 @@ public class AddDataInputStreamToZipTask extends AbstractAddFileToZipTask<AddDat
              ZipOutputStream zipOutputStream = initializeOutputStream(splitOutputStream, taskParameters.zip4jConfig)) {
 
             int fileCount = taskParameters.dataInputStream.readInt();
-
             for(int iter = 1; iter <= fileCount; iter ++) {
                 verifyIfTaskIsCancelled();
-                String fileName = taskParameters.dataInputStream.readUTF();
+                String fileName = null;
+                try {
+                    fileName = taskParameters.dataInputStream.readUTF();
+                } catch(UTFDataFormatException utfde) {
+                    throw new ZipException("Incorrect UTF format in the file name, Gotcha!");
+                }
                 progressMonitor.setFileName(fileName);
                 ZipParameters zipParameters = new ZipParameters();
                 zipParameters.setFileNameInZip(fileName);
@@ -96,6 +101,7 @@ public class AddDataInputStreamToZipTask extends AbstractAddFileToZipTask<AddDat
             this.zipParameters = zipParameters;
             try {
                 this.rootFolderName = dataInputStream.readUTF();
+                System.out.println("Read root folder name from stream: " + rootFolderName);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

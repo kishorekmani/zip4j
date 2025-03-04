@@ -18,10 +18,7 @@ import net.lingala.zip4j.util.FileUtils;
 import net.lingala.zip4j.util.InternalZipConstants;
 import net.lingala.zip4j.util.Zip4jUtil;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -86,6 +83,25 @@ public abstract class AbstractAddFileToZipTask<T> extends AsyncZipTask<T> {
     }
   }
 
+  //Custom
+  void addFileFromStreamToZip(DataInputStream dataInputStream, ZipOutputStream zipOutputStream, ZipParameters zipParameters,
+                                      SplitOutputStream splitOutputStream, ProgressMonitor progressMonitor,
+                                      byte[] readBuff) throws IOException {
+
+    zipOutputStream.putNextEntry(zipParameters);
+    long fileLength = dataInputStream.readLong();
+    int readLen;
+    long bytesRead = 0;
+    while(bytesRead < fileLength) {
+      readLen = dataInputStream.read(readBuff);
+      zipOutputStream.write(readBuff, 0, readLen);
+      progressMonitor.updateWorkCompleted(readLen);
+      bytesRead += readLen;
+      verifyIfTaskIsCancelled();
+    }
+    closeEntryOfStreamedFile(zipOutputStream, splitOutputStream, dataInputStream, false);
+  }
+
   private void addSymlinkToZip(File fileToAdd, ZipOutputStream zipOutputStream, ZipParameters zipParameters,
                                SplitOutputStream splitOutputStream) throws IOException {
 
@@ -133,6 +149,23 @@ public abstract class AbstractAddFileToZipTask<T> extends AsyncZipTask<T> {
 
     fileHeader.setExternalFileAttributes(fileAttributes);
 
+    updateLocalFileHeader(fileHeader, splitOutputStream);
+  }
+
+  //Custom
+  private void closeEntryOfStreamedFile(ZipOutputStream zipOutputStream, SplitOutputStream splitOutputStream, InputStream inputStream,
+                          boolean isSymlink) throws IOException {
+    //File Permission related attributes
+    //byte[] fileAttributes = FileUtils.getFileAttributes(fileToAdd);
+
+//    if (!isSymlink) {
+//      // Unset the symlink byte if the entry being added is a symlink, but the original file is being added
+//      fileAttributes[3] = BitUtils.unsetBit(fileAttributes[3], 5);
+//    }
+
+    //fileHeader.setExternalFileAttributes(fileAttributes);
+
+    FileHeader fileHeader = zipOutputStream.closeEntry();
     updateLocalFileHeader(fileHeader, splitOutputStream);
   }
 
