@@ -44,7 +44,7 @@ public class ZipOutputStream extends OutputStream {
   private boolean entryClosed = true;
 
   public ZipOutputStream(OutputStream outputStream) throws IOException {
-    this(outputStream, null, null);
+    this(outputStream, (char[]) null, null);
   }
 
   public ZipOutputStream(OutputStream outputStream, Charset charset) throws IOException {
@@ -76,6 +76,10 @@ public class ZipOutputStream extends OutputStream {
     writeSplitZipHeaderIfApplicable();
   }
 
+  public ZipOutputStream(OutputStream outputStream, Zip4jConfig zip4jConfig, ZipModel zipModel) throws IOException {
+    this(outputStream, (char[]) null, zip4jConfig, zipModel);
+  }
+
   public void putNextEntry(ZipParameters zipParameters) throws IOException {
     verifyZipParameters(zipParameters);
     ZipParameters clonedZipParameters = cloneAndPrepareZipParameters(zipParameters);
@@ -98,6 +102,7 @@ public class ZipOutputStream extends OutputStream {
 
   public void write(byte[] b, int off, int len) throws IOException {
     ensureStreamOpen();
+    System.out.println("Params:" + b.length + " " + off + " " + len);
     crc32.update(b, off, len);
     compressedOutputStream.write(b, off, len);
     uncompressedSizeForThisEntry += len;
