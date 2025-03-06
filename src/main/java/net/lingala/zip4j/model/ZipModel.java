@@ -42,6 +42,54 @@ public class ZipModel implements Cloneable {
     splitLength = -1;
   }
 
+  public static class ZipModelBuilder {
+
+    private ZipModel zipModel;
+
+    public ZipModelBuilder() {
+      this.zipModel = new ZipModel();
+    }
+
+    public ZipModelBuilder setZipFile(File zipFile) {
+      zipModel.setZipFile(zipFile);
+      return this;
+    }
+
+    public ZipModelBuilder setSplitArchive(boolean splitArchive) {
+      zipModel.setSplitArchive(splitArchive);
+      return this;
+    }
+
+    public ZipModelBuilder setSplitLength(long splitLength) {
+      zipModel.setSplitLength(splitLength);
+      return this;
+    }
+
+    public ZipModelBuilder setZip64Format(boolean isZip64Format) {
+      zipModel.setZip64Format(isZip64Format);
+      return this;
+    }
+
+    public ZipModelBuilder setNestedZipFile(boolean isNestedZipFile) {
+      zipModel.setNestedZipFile(isNestedZipFile);
+      return this;
+    }
+
+    public ZipModelBuilder setStart(long start) {
+      zipModel.setStart(start);
+      return this;
+    }
+
+    public ZipModelBuilder setEnd(long end) {
+      zipModel.setEnd(end);
+      return this;
+    }
+
+    public ZipModel build() {
+      return zipModel;
+    }
+  }
+
   public List<LocalFileHeader> getLocalFileHeaders() {
     return localFileHeaders;
   }
