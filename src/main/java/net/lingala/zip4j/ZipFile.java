@@ -1180,6 +1180,17 @@ public class ZipFile implements Closeable {
     this.bufferSize = bufferSize;
   }
 
+  //Custom
+  public HeaderWriter getHeaderWriter()
+    throws ZipException {
+    return this.headerWriter;
+  }
+
+  //Custom
+  public void setHeaderWriter(HeaderWriter headerWriter) {
+    this.headerWriter = headerWriter;
+  }
+
   /**
    * Reads the zip header information for this zip file. If the zip file
    * does not exist, it creates an empty zip model.<br><br>
