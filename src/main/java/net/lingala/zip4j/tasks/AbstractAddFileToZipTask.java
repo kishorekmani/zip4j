@@ -93,11 +93,16 @@ public abstract class AbstractAddFileToZipTask<T> extends AsyncZipTask<T> {
     int readLen;
     long bytesRead = 0;
     while(bytesRead < fileLength) {
-      readLen = dataInputStream.read(readBuff);
+      readLen = dataInputStream.read(readBuff, 0, (int) Math.min(readBuff.length, fileLength - bytesRead));
       zipOutputStream.write(readBuff, 0, readLen);
       progressMonitor.updateWorkCompleted(readLen);
       bytesRead += readLen;
       verifyIfTaskIsCancelled();
+    }
+    //get and dispose EOF marker (-1) after every file
+    int eofMarker = dataInputStream.readInt();
+    if(eofMarker == -1) {
+      throw new ZipException("EOF marker expeceted, but obtained: " + eofMarker);
     }
     closeEntryOfStreamedFile(zipOutputStream, splitOutputStream, dataInputStream, false);
   }
