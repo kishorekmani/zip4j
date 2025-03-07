@@ -75,6 +75,8 @@ public class AddDataInputStreamToZipTask extends AbstractAddFileToZipTask<AddDat
                 ZipParameters zipParameters = new ZipParameters();
                 zipParameters.setRootFolderNameInZip(taskParameters.zipParameters.getRootFolderNameInZip());
                 zipParameters.setFileNameInZip(fileName);
+                zipParameters.setCompressionMethod(taskParameters.zipParameters.getCompressionMethod());
+                zipParameters.setCompressionLevel(taskParameters.zipParameters.getCompressionLevel());
                 addFileFromStreamToZip(taskParameters.dataInputStream, zipOutputStream, zipParameters, splitOutputStream, progressMonitor, readBuff);
             }
         }
