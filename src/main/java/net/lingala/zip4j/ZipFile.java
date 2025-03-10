@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -1133,6 +1134,16 @@ public class ZipFile implements Closeable {
   public List<File> getSplitZipFiles() throws ZipException {
     readZipInfo();
     return FileUtils.getSplitZipFiles(zipModel);
+  }
+
+  //return as vector, needed for DFS
+  public Vector<String> getSplitZipFileNamesVector() throws ZipException {
+    readZipInfo();
+    Vector<String> vector = new Vector<String>();
+    for(File file : FileUtils.getSplitZipFiles(zipModel)) {
+      vector.add(file.getName());
+    }
+    return vector;
   }
 
   /**
